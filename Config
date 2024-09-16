@@ -73,7 +73,7 @@ AT_QSUB="mem=10gb,nodes=1:ppn=4,walltime=12:00:00"
 #   QUEUE=Slurm: What are our sbatch settings?
 #       Below are the recommended settings
 AT_PARTITION="batch"
-AT_SBATCH="--nodes=1 --ntasks-per-node=4 --mem=13gb --time=12:00:00 --mail-type=BEGIN,END,FAIL --mail-user=${EMAIL} --partition=${AT_PARTITION}"
+AT_SBATCH="--nodes=1 --ntasks=4 --mem=13gb --time=12:00:00 --mail-type=BEGIN,END,FAIL --mail-user=${EMAIL} --partition=${AT_PARTITION}"
 
 #   What files to trim?
 #	This handler will accept either a list of forward samples OR
