@@ -7,7 +7,6 @@ Built from Emily Dittmar's sunflower expression pipeline: https://github.com/EDi
 
 ## Programs Used:  
 FASTQC: https://dnacore.missouri.edu/PDF/FastQC_Manual.pdf  
-MultiQC: https://multiqc.info/  
 Trimmomatic: http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/TrimmomaticManual_V0.32.pdf  
 STAR: http://chagall.med.cornell.edu/RNASEQcourse/STARmanual.pdf  
 
@@ -17,23 +16,22 @@ Where `<handler>` is one of the handlers listed below, and `Config` is the full 
 
 ## Pre-processing
 
-Start with raw sequence data. Simply copy this data into your working scratch directory.
+Start with raw sequence data (FastQ files). Copy this data into your working scratch directory.
 
 ## Step 1: Quality_Assessment
 Run Quality_Assessment on your raw FastQ files. 
 
-To run Quality_Assessment, all common and handler-specific variables must be defined within the configuration file. Once the variables have been defined, Quality_Assessment can be submitted to a job scheduler with the following command (assuming that you are in the directory containing `dev_RNAseq`)
+To run Quality_Assessment, all common and handler-specific variables must be defined within the configuration file. Once the variables have been defined in the Config file, Quality_Assessment can be submitted to a job scheduler with the following command (assuming that you are in the directory containing `dev_RNAseq`)
 `./dev_RNAseq.sh Quality_Assessment Config`
 where `Config` is the full file path to the configuration file
 
-A directory containing your files to be analyzed must be specified in the config file. It is ok if this is a directory containing sub-directories for each sample (which is the format for raw data as it comes from Basespace).
+A directory containing your files to be analyzed must be specified in the config file. It can be a directory containing sub-directories for each sample (which is the format for raw data as it comes from Basespace).
 
-After quality has been assessed for each sample, the FastQC results will be summarized using MultiQC. These summary statistics will be located in the output directory specified in the config file.
 
 ## Step 2: Adapter_Trimming
 The Adapter_Trimming handler uses Trimmomatic to trim adapter sequences from FastQ files. Trimmomatic takes paired-end information into account when doing so (if applicable).
 
-The Adapter_Trimming handler can accept as input EITHER a directory (which can be to multiple sub-directories for each sample) or a text-file list of forward samples (it will find the reverse samples based on the naming suffix specified in the config file)
+The Adapter_Trimming handler can accept as input EITHER a directory (which can be to multiple sub-directories for each sample) or a text-file list of forward samples (reverse samples will be found based on the naming suffix specified in the config file)
 
 To run Adapter_Trimming, all common and handler-specific variables must be defined within the configuration file. Once the variables have been defined, Adapter_Trimming can be submitted to a job scheduler with the following command (assuming that you are in the directory containing `dev_RNAseq`)  
 `./dev_RNAseq.sh Adapter_Trimming Config`  
@@ -45,7 +43,7 @@ It is recommended that you re-run Quality_Assessment after adapter trimming to e
 
 ## Step 3: Genome_Index  
 
-This handler will generate a genome index using FASTA and GFF3 or GTF formatted annotations. This step only needs to be performed once for each genome/annotation combination.
+This handler will generate a genome index using the genome FASTA file, along with annotations formatted as either a GFF3 or GTF. Be sure to specify GFF3 or GTF in the Config file. This step only needs to be performed once for each genome/annotation combination.
 
 If using a GFF3 file for genome indexing rather than the default GTF file, the option `--sjdbGTFtagExonParentTranscript Parent` is added to the script 
 
@@ -53,15 +51,15 @@ To run Genome_Index, all common and handler-specific variables must be defined w
 `./dev_RNAseq.sh Genome_Index Config`  
 where `Config` is the full file path to the configuration file.
 
-You will use the contents of the output (directory specified in the Config file) for the next step
+Specify where you want the genome index outputs to be located in the Config file. These outputs will be used in the following step. 
 
 ## Step 4: Read_Mapping (and transcript quantification)
 
-The Read_Mapping handler uses STAR to map reads to the genome indexed in step 3.
+STAR is utilized in the Read_Mapping script to map reads to the indexed genome from step 3. 
 
 This handler can accept as input EITHER a directory or a text-file list of forward samples (it will find the reverse samples based on the naming suffix specified in the config file)
 
-**We are using -GeneCounts flag of STAR (specified in Config file) which will also quanitfy our transcripts and the output will be in a `.tab` file (one file for each sample) with the rest of the STAR output. These are the files that we will use to analyze our expression data, so this is the most important output from this step.**
+**We are using -GeneCounts flag of STAR (specified in Config file) which will quantify our transcripts and produce an output in a `.tab` file (one file for each sample) with the rest of the STAR outputs. These are the files that we will use to analyze our expression data, so this is the most important output from this step!!**
 
 ### Option for 2-pass mapping
 STAR can perform a 2-pass mapping strategy to increase mapping sensitivity around novel splice junctions. This works by running a 1st mapping pass for all samples with the "usual" parameters to identify un-annotated splice junctions. Then mapping is re-run, using the junctions detected in the first pass (in addition to the annotated junctions specified in the genome annotation file). This 2-pass mapping strategy is recommended by GATK and ENCODE best-practices for better alignments around novel splice junctions.
@@ -69,7 +67,7 @@ STAR can perform a 2-pass mapping strategy to increase mapping sensitivity aroun
 While STAR can perform 2-pass mapping on a per-sample basis, in a study with multiple samples, it is recommended to collect 1st pass junctions from all samples for the second pass. Therefore, the recommended 2-pass procedure is described below: 
 
 #### Step 4a: Collect_Junctions
-This step identifies novel junctions during a first read-mapping pass and outputs them as "SJ.out.tab" files for each sample. In the handler used here, only junctions supported by at least 1 uniquely mapped read will be output. This step shares variables for Read_Mapping in the config file, so make sure these are filled out.
+This step identifies novel junctions during a first read-mapping pass and outputs them as "SJ.out.tab" files for each sample. In the handler used here, only junctions supported by at least 1 uniquely mapped read will be output. This step shares variables for Read_Mapping in the config file, so make sure these are filled out and matching.
 
 Once the variables have been defined, Collect_Junctions can be submitted to a job scheduler with the following command (assuming that you are in the directory containing `dev_RNAseq`)  
 `./dev_RNAseq.sh Collect_Junctions Config`   
@@ -127,5 +125,5 @@ This will give us an idea of the relationship between our samples. In the next s
 We will visualize the corrected samples in an MDS plot as well (compare with above). The model we are using to run the differential epxression analysis is ~0+dev_stage as we are curious about differential expression wrt dev_stage. 
 ## 3. Visualize DE in an Upset Plot
 `analyze_DGE_deseq_sunflower_inflo_combatseq.R`
-## 4. Run and analyze WGCNA
+## 4. Can run any downstream programs/analyses! WGCNA, clustering, GO, etc. 
 
