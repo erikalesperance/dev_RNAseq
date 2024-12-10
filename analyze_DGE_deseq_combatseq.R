@@ -1,9 +1,8 @@
-# Name: analyze DGE deseq sunflower inflo ruvseq
+# Name: analyze DGE deseq Bidens dev stages 
 # Author: EY (based off of code written by E. Dittmar)
-# Date: 08/29/2023
-# Version:4.2.1
+# Date: 08/30/2024
 # Description: Will analyze the output from the DESeq DGE with combatseq for pairwise dev stages
-# need Functions.R written by ED
+# need Functions.R written by ED in the working directory for this to run properly 
 
 
 setwd('/Users/erikalesperance/Desktop/DEseq/gene_count_data')
