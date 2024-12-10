@@ -1,6 +1,6 @@
 # Name: plot_MDS
-# Author: EY
-# Date: 12/24/2022 (edited 08/21/2023)
+# Author: ELL
+# Date: 8/30/2024
 # Version:4.2.1
 # Description: will read the data matrix from load_GC_data_and_sum_reps into
 # DESeq2, read in metadata,pre-filter and plotMDS
@@ -9,31 +9,32 @@ library(readxl)
 library(DESeq2)
 library(dplyr)
 library(Glimma)
-library(RUVSeq)
 library(sva)
 
-
-setwd('/home/ely67071/sunflower_inflo_dev_analysis/')
+#BiocManager::install("sva")
+setwd('/Users/erikalesperance/Desktop/DEseq/gene_count_data')
 
 # read in the data matrix
-summed_counts<-readRDS("/scratch/ely67071/sunflower_inflo_dev_data/collapsed_replicates_deseq_dataset.Rdata")
+summed_counts<-readRDS("/Users/erikalesperance/Desktop/DEseq/collapsed_rep_dataset.Rdata")
 dim(summed_counts)
 
 
 summed_counts$replicates
 
 
-samples=c("10D_REP1_ATTACTCG", "20D_REP2_TCCGGAGA" ,"30D_REP2_CGCTCATT", "35D_REP1_GAGATTCC", 
-           "HA_10D_2_ACCTTGGC", "HA_10D_3_ATATCTCG", "HA_20D_2_GCGCTCTA", 
-           "HA_20D_3_AACAGGTT", "HA_30D_2_GGTGAACC", "HA_30D_3_CAACAATG", "HA_35D_2_TGGTGGCA", "HA_35D_3_AGGCAGAG")
+samples=c("Stage_I_2A", "Stage_I_3A", "Stage_I_4A", "Stage_II_2A", "Stage_II_3A", "Stage_II_4A", 
+          "Stage_III_2A", "Stage_III_3A", "Stage_III_4A", "Stage_IV_2A", "Stage_IV_3A", "Stage_IV_4A")
 
-dev_stage<-sub(".*([0-9]{2,2}D).*", "\\1",samples)
+dev_stage=c("I","I","I", "II","II","II","III","III","III","IV","IV","IV")
+tissue_type=c("inflo","inflo","inflo","inflo","inflo","inflo","inflo","inflo","inflo","inflo","inflo","inflo")
+#dev_stage<-sub(".*([0-9]{2,2}D).*", "\\1",samples)
 
 
-metadata<-data.frame(samples, dev_stage)
+metadata<-data.frame(samples, tissue_type,dev_stage)
 
 # create the factors of interest
 metadata$dev_stage<-factor(metadata$dev_stage)
+metadata$tissue_type<-factor(metadata$tissue_type)
 
 
 
@@ -47,12 +48,3 @@ summed_counts_filt<-summed_counts[keep,]
 
 # will load the plot...need to save within the html
 glimmaMDS(summed_counts_filt, groups=metadata)
-
-# plot PCA 
-png("plots/pca_raw_data.png", res=215, width = 1200, height=1000)
-par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
-DESeq2::plotPCA((summed_counts_filt),labels=FALSE,col=dev_stage)
-legend("topright",inset=c(-0.4,0),legend=unique(dev_stage), fill=dev_stage)
-dev.off()
-
-?EDASeq::plotPCA
