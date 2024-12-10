@@ -2,8 +2,8 @@
 
 set -o pipefail
 
-# read in the STAR module
-ml STAR/2.7.10a-GCC-8.3.0
+# read in the star module
+ml star
 
 # Define Exon Parent Gene and Transcript Tags
 
