@@ -13,19 +13,20 @@ STAR: http://chagall.med.cornell.edu/RNASEQcourse/STARmanual.pdf
 To run `dev_RNAseq`, use the following command, assuming you are in the `dev_RNAseq` directory:  
 `./dev_RNAseq.sh <handler> Config`  
 Where `<handler>` is one of the handlers listed below, and `Config` is the full file path to the configuration file
+Prior to beginning this pipeline, update the configuration file with your specific project name, email, if the data is pair-ended or not, and the batch system (PBS or slurm). 
 
-## Pre-processing
+## Data pre-processing
 
 Start with raw sequence data (FastQ files). Copy this data into your working scratch directory.
 
 ## Step 1: Quality_Assessment
-Run Quality_Assessment on your raw FastQ files. 
+Run Quality_Assessment on the raw FastQ files. 
 
 To run Quality_Assessment, all common and handler-specific variables must be defined within the configuration file. Once the variables have been defined in the Config file, Quality_Assessment can be submitted to a job scheduler with the following command (assuming that you are in the directory containing `dev_RNAseq`)
 `./dev_RNAseq.sh Quality_Assessment Config`
 where `Config` is the full file path to the configuration file
 
-A directory containing your files to be analyzed must be specified in the config file. It can be a directory containing sub-directories for each sample (which is the format for raw data as it comes from Basespace).
+The entire pathway to the directory containing your files to be analyzed must be specified in the config file. It can be a directory containing sub-directories for each sample (which is the format for raw data as it comes from Basespace).
 
 
 ## Step 2: Adapter_Trimming
@@ -43,7 +44,7 @@ It is recommended that you re-run Quality_Assessment after adapter trimming to e
 
 ## Step 3: Genome_Index  
 
-This handler will generate a genome index using the genome FASTA file, along with annotations formatted as either a GFF3 or GTF. Be sure to specify GFF3 or GTF in the Config file. This step only needs to be performed once for each genome/annotation combination.
+This handler will generate a genome index using the genome FASTA file, along with annotations formatted as either a GFF3 or GTF. Be sure to specify GFF3 or GTF in the Config file!! This step only needs to be performed once for each genome/annotation combination.
 
 If using a GFF3 file for genome indexing rather than the default GTF file, the option `--sjdbGTFtagExonParentTranscript Parent` is added to the script 
 
@@ -119,11 +120,11 @@ Load the GeneCount data into a DESeq dataset and collapse technical replicates (
 `load_GC_data_and_sum_reps.R`
 ## 1. Visualize data in an MDS plot
 `plot_MDS.R`
-This will give us an idea of the relationship between our samples. In the next step we will be correcting for varaition, but it is important to visualize at this step.
+This will give us an idea of the relationship between our samples. In the next step we will be correcting for variation, but it is important to visualize at this step.
 ## 2. Correct for unwanted variation using [ComBat-Seq](https://github.com/zhangyuqing/ComBat-seq) and run DEseq
-`run_DGE_deseq_sunflower_inflo_combatseq.R`
+`run_DGE_deseq_combatseq.R`
 We will visualize the corrected samples in an MDS plot as well (compare with above). The model we are using to run the differential epxression analysis is ~0+dev_stage as we are curious about differential expression wrt dev_stage. 
 ## 3. Visualize DE in an Upset Plot
-`analyze_DGE_deseq_sunflower_inflo_combatseq.R`
+`analyze_DGE_deseq_combatseq.R`
 ## 4. Can run any downstream programs/analyses! WGCNA, clustering, GO, etc. 
 
