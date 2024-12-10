@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# read in the STAR module
-ml STAR/2.7.10a-GCC-8.3.0
+# read in the star module
+ml star
 
 set -o pipefail
 
@@ -69,7 +69,7 @@ elif [[ "${QUEUE}" == "PBS" ]]; then
     STAR="${STAR_FILE}"
 fi
 
-###STAR mapping
+###star mapping
 if [[ "$RM_PASS" == "first" ]]; then ###first pass mode
 	echo "In first pass Mode"
 	STAR\
